@@ -13,6 +13,7 @@ export default async function DashboardPage() {
     .eq("id", userData.user.id)
     .single();
 
-  // Firms are admin-only. Non-admins get read-only notice, no form.
-  return <DashboardClient isAdmin={profile?.role === "admin"} />;
+  // Firms are admin-only. Non-admins never see the dashboard.
+  if (profile?.role !== "admin") redirect("/marketplace");
+  return <DashboardClient />;
 }

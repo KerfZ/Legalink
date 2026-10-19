@@ -66,11 +66,14 @@ from public.firms
 where is_published = true;
 
 -- 6) RLS policies
--- profiles: users read/update own, admins read all
+-- profiles: users read own; update own display_name only (role locked — see trigger below).
+-- New users default to 'client'. Only existing admins can change roles.
 create policy "users read own profile"
   on public.profiles for select to authenticated using (auth.uid() = id);
-create policy "users update own profile"
-  on public.profiles for update to authenticated using (auth.uid() = id);
+create policy "users update own display_name"
+  on public.profiles for update to authenticated
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
 
 -- firms: any logged-in user can read published firms (contact included — route is login-gated).
 -- anon sees nothing via table (must use public_firms view via anon? we keep list login-gated so deny anon).
@@ -101,6 +104,28 @@ grant select on public.public_firms to anon, authenticated;
 grant all on public.firms to authenticated;
 grant all on public.cases to authenticated;
 grant all on public.profiles to authenticated;
+
+-- 6b) Prevent role escalation: users cannot make themselves admin.
+-- Only an existing admin can change someone's role.
+create or replace function public.prevent_role_escalation()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  caller_role text;
+begin
+  if old.role = new.role then
+    return new;
+  end if;
+  select role into caller_role from public.profiles where id = auth.uid();
+  if caller_role = 'admin' then
+    return new;
+  end if;
+  raise exception 'Only admins can change roles.';
+end;
+$$;
+drop trigger if exists prevent_role_escalation on public.profiles;
+create trigger prevent_role_escalation
+  before update of role on public.profiles
+  for each row execute function public.prevent_role_escalation();
 
 -- 7) AFTER running: make yourself admin (replace with your login email's user id):
 --   1. Sign up once in the app, then in Supabase > Authentication > Users copy your UUID

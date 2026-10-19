@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { SiteNav } from "@/components/site-nav";
 import { Firm, formatRange } from "@/lib/legalink";
 
-export default function DashboardClient({ isAdmin }: { isAdmin: boolean }) {
+export default function DashboardClient() {
   const [firms, setFirms] = useState<Firm[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -66,35 +66,35 @@ export default function DashboardClient({ isAdmin }: { isAdmin: boolean }) {
         <div className="legal-eyebrow">Dashboard</div>
         <h1 style={{ letterSpacing: -2, margin: "8px 0" }}>Manage firms.</h1>
         <p className="legal-tiny">
-          Database starts empty. {isAdmin ? "You are admin." : "Need admin role — run SQL at bottom of schema.sql."}
+          Admin only. Firms are curated — users cannot submit firms.
         </p>
         {error && <div className="legal-notice">{error}</div>}
         {notice && <div className="legal-notice">{notice}</div>}
         <div className="legal-market" style={{ marginTop: 20 }}>
           <form onSubmit={onSubmit} className="legal-panel">
             <h3 style={{ margin: 0 }}>Add a firm</h3>
-            <div className="legal-field"><label>FIRM NAME</label><input name="name" required disabled={!isAdmin} /></div>
-            <div className="legal-field"><label>INITIALS</label><input name="initials" disabled={!isAdmin} /></div>
+            <div className="legal-field"><label>FIRM NAME</label><input name="name" required /></div>
+            <div className="legal-field"><label>INITIALS</label><input name="initials" /></div>
             <div className="legal-field"><label>PRACTICE AREA</label>
-              <select name="practice_area" required disabled={!isAdmin}>
+              <select name="practice_area" required>
                 <option>Business contracts</option><option>Licensing</option>
                 <option>Civil disputes</option><option>Property</option><option>Family law</option>
               </select>
             </div>
             <div className="legal-field"><label>COMPLEXITY</label>
-              <select name="complexity" required disabled={!isAdmin}>
+              <select name="complexity" required>
                 <option>Low</option><option>Medium</option><option>High</option>
               </select>
             </div>
-            <div className="legal-field"><label>PRICE MIN (IDR)</label><input name="price_min" type="number" required disabled={!isAdmin} /></div>
-            <div className="legal-field"><label>PRICE MAX (IDR)</label><input name="price_max" type="number" required disabled={!isAdmin} /></div>
-            <div className="legal-field"><label>DESCRIPTION</label><textarea name="description" required disabled={!isAdmin} /></div>
-            <div className="legal-field"><label>TAGS (comma separated)</label><input name="tags" disabled={!isAdmin} /></div>
-            <div className="legal-field"><label>BRIEF HISTORY</label><textarea name="history" required disabled={!isAdmin} /></div>
-            <div className="legal-field"><label>CONTACT NAME</label><input name="contact_name" disabled={!isAdmin} /></div>
-            <div className="legal-field"><label>CONTACT EMAIL</label><input name="contact_email" disabled={!isAdmin} /></div>
-            <div className="legal-field"><label>CONTACT PHONE</label><input name="contact_phone" disabled={!isAdmin} /></div>
-            <button className="legal-primary legal-full" style={{ marginTop: 14 }} disabled={!isAdmin || saving} type="submit">
+            <div className="legal-field"><label>PRICE MIN (IDR)</label><input name="price_min" type="number" required /></div>
+            <div className="legal-field"><label>PRICE MAX (IDR)</label><input name="price_max" type="number" required /></div>
+            <div className="legal-field"><label>DESCRIPTION</label><textarea name="description" required /></div>
+            <div className="legal-field"><label>TAGS (comma separated)</label><input name="tags" /></div>
+            <div className="legal-field"><label>BRIEF HISTORY</label><textarea name="history" required /></div>
+            <div className="legal-field"><label>CONTACT NAME</label><input name="contact_name" /></div>
+            <div className="legal-field"><label>CONTACT EMAIL</label><input name="contact_email" /></div>
+            <div className="legal-field"><label>CONTACT PHONE</label><input name="contact_phone" /></div>
+            <button className="legal-primary legal-full" style={{ marginTop: 14 }} disabled={saving} type="submit">
               {saving ? "Saving…" : "Add firm"}
             </button>
           </form>
@@ -112,11 +112,9 @@ export default function DashboardClient({ isAdmin }: { isAdmin: boolean }) {
                   </div>
                   <div className="legal-firm-right">
                     <strong>{formatRange(f.price_min, f.price_max)}</strong>
-                    {isAdmin && (
-                      <div style={{ marginTop: 8 }}>
-                        <button className="legal-outlinebtn" onClick={() => removeFirm(f.id)}>Delete</button>
-                      </div>
-                    )}
+                    <div style={{ marginTop: 8 }}>
+                      <button className="legal-outlinebtn" onClick={() => removeFirm(f.id)}>Delete</button>
+                    </div>
                   </div>
                 </article>
               ))}
