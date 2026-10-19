@@ -1,0 +1,12 @@
+-- Seed 04/05: Property (10 placeholder firms)
+insert into public.firms (name, initials, practice_area, complexity, price_min, price_max, description, tags, history, contact_name, contact_email, contact_phone, is_published) values
+('Terra & Home Legal','TH','Property','Medium',2500000,5000000,'Property documentation and ownership issues.','{Property,Document review,Clear process}','AJB/SHM guidance.','Terra Handoko','terra@terrahome.example','+62-21-555-0401',true),
+('Pondasi Kita Counsel','PK2','Property','Low',1200000,2600000,'Kost and lease agreement reviews.','{Lease,Kost,Review}','First-time landlords.','Pondasi Tim','halo@pondasikita.example','+62-21-555-0402',true),
+('Sertifikat Tanah Co.','ST','Property','High',6000000,14000000,'Title checks and property splits.','{Title,Inheritance,Splits}','Works with notaries.','Sertyo Nugroho','sertyo@sertifikattanah.example','+62-21-555-0403',true),
+('Rumah Rapi Legal','RRL','Property','Low',900000,1900000,'Sale-purchase checklists.','{Checklist,Sale-purchase,First home}','First-home friendly.','Rapi Anjani','rapi@rumahrapi.example','+62-21-555-0404',true),
+('Lahan Lestari House','LL','Property','Medium',3000000,6200000,'Boundaries and neighbor agreements.','{Boundaries,Neighbors,Coordination}','Rural and peri-urban focus.','Lahan Prasetyo','lahan@lahanlestari.example','+62-21-555-0405',true),
+('Griya Jelas Studio','GJ','Property','Low',1000000,2100000,'Rental disputes and deposit recovery.','{Rental,Deposits,Letters}','Fast letters.','Griya Jelita','griya@griyajelas.example','+62-21-555-0406',true),
+('Aset Aman Partners','AAP','Property','High',7000000,15000000,'Multi-unit owner documentation.','{Portfolio,Multi-unit,Owners}','Kos and ruko owners.','Asep Amanah','asep@asetaman.example','+62-21-555-0407',true),
+('Tanah Kita Legal','TKL','Property','Medium',2700000,5400000,'Girik-to-SHM guidance.','{Girik,SHM,Pathway}','Stepwise programs.','Tania Kusuma','tania@tanahkita.example','+62-21-555-0408',true),
+('Kontrak Kos House','KKH','Property','Low',700000,1500000,'Kos templates and house rules.','{Kos,Templates,House rules}','Template packs.','Kos Tim','halo@kontrakkos.example','+62-21-555-0409',true),
+('Bata & Batas Counsel','BB','Property','Medium',3200000,6800000,'Renovation contracts, dispute prevention.','{Renovation,Contractors,Prevention}','Pre-sign reviews.','Bata Wibowo','bata@batabatas.example','+62-21-555-0410',true);

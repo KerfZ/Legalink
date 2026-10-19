@@ -7,21 +7,12 @@ import { LogoutButton } from "./logout-button";
 
 export function SiteNav() {
   const [loggedIn, setLoggedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     async function check() {
       const supabase = createClient();
       const { data } = await supabase.auth.getUser();
       setLoggedIn(!!data.user);
-      if (data.user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", data.user.id)
-          .single();
-        setIsAdmin(profile?.role === "admin");
-      }
     }
     check();
   }, []);
@@ -36,10 +27,7 @@ export function SiteNav() {
         <Link href="/marketplace">Explore firms</Link>
         <Link href="/#about">Our approach</Link>
         {loggedIn ? (
-          <>
-            {isAdmin && <Link href="/dashboard">Dashboard</Link>}
-            <LogoutButton />
-          </>
+          <LogoutButton />
         ) : (
           <>
             <Link href="/auth/login">Log in</Link>

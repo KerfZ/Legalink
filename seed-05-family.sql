@@ -1,0 +1,12 @@
+-- Seed 05/05: Family law (10 placeholder firms)
+insert into public.firms (name, initials, practice_area, complexity, price_min, price_max, description, tags, history, contact_name, contact_email, contact_phone, is_published) values
+('Common Ground Counsel','CG','Family law','Medium',2000000,4500000,'Client-centered family legal questions.','{Family law,Consultation,Emerging firm}','Trauma-informed intake.','Citra Gundari','citra@commonground.example','+62-21-555-0501',true),
+('Keluarga Kita Legal','KKL','Family law','Low',1000000,2300000,'Custody questions and paperwork.','{Custody,Paperwork,Consult}','Gentle first sessions.','Keluarga Tim','halo@keluargakita.example','+62-21-555-0502',true),
+('Asuh Bersama House','AB','Family law','Medium',2500000,5200000,'Co-parenting agreements.','{Co-parenting,Visitation,Agreements}','Child-focused drafting.','Asuh Bersama','asuh@asuhbersama.example','+62-21-555-0503',true),
+('Harta Bersama Co.','HB','Family law','High',5500000,12000000,'Asset division and settlement.','{Assets,Division,Settlement}','Financial reviewers.','Harta Wacana','harta@hartabersama.example','+62-21-555-0504',true),
+('Pisah Baik Studio','PBL','Family law','Low',900000,2000000,'Amicable separation guidance.','{Amicable,Separation,Paperwork}','Mediation-first.','Pisah Tim','halo@pisahbaik.example','+62-21-555-0505',true),
+('Wali Aman Counsel','WA','Family law','Medium',2800000,5800000,'Guardianship consults.','{Guardianship,Documents,Consult}','Sensitive-case intake.','Wali Amanah','wali@waliaman.example','+62-21-555-0506',true),
+('Nafkah Jelas House','NJ','Family law','Low',800000,1800000,'Support calculations.','{Support,Calculations,Letters}','Calculator packs.','Nafkah Tim','halo@nafkahjelas.example','+62-21-555-0507',true),
+('Ruang Aman Legal','RAL','Family law','High',6500000,14000000,'High-conflict coordination.','{High-conflict,Mediators,Coordination}','Multi-disciplinary team.','Ruang Aman','ruang@ruangaman.example','+62-21-555-0508',true),
+('Cerai Bijak Counsel','CB','Family law','Medium',3000000,6000000,'Measured divorce guidance.','{Divorce,Filing,Checklists}','No-rush advisory.','Ceria Bijak','ceria@ceraibijak.example','+62-21-555-0509',true),
+('Kumpul Kembali Co.','KKC','Family law','Low',700000,1600000,'Reconciliation referrals plus info.','{Reconciliation,Referrals,Info}','Monthly info sessions.','Kumpul Tim','halo@kumpulkembali.example','+62-21-555-0510',true);

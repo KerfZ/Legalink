@@ -65,7 +65,7 @@ function MarketplaceContent() {
             <div className="legal-eyebrow">The marketplace</div>
             <h2>Find your legal fit.</h2>
           </div>
-          <p>Login-gated. Firms start empty — add them via the dashboard.</p>
+          <p>Login-gated. Curated firms for every budget and complexity.</p>
         </div>
         <div className="legal-market">
           <aside className="legal-panel">
@@ -116,10 +116,7 @@ function MarketplaceContent() {
             {loadError && <div className="legal-notice">{loadError} — did you run schema.sql?</div>}
             {!loading && filtered.length === 0 && (
               <div className="legal-empty">
-                No firms match. The database starts empty — go to Dashboard to add your first firm.
-                <div style={{ marginTop: 12 }}>
-                  <Link href="/dashboard" className="legal-outlinebtn">Open dashboard</Link>
-                </div>
+                No firms match these filters. Try widening the budget or complexity.
               </div>
             )}
             <div className="legal-firm-list">

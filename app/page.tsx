@@ -71,7 +71,7 @@ export default async function Home() {
             <p>Live firms from the database. Log in to filter, compare, and view contacts.</p>
           </div>
           {!previewFirms || previewFirms.length === 0 ? (
-            <div className="legal-empty">No firms published yet. Log in and check back soon — new firms are added via the admin dashboard.<div style={{ marginTop: 12 }}><Link href={cta} className="legal-outlinebtn">Describe your case first</Link></div></div>
+            <div className="legal-empty">No firms published yet. Log in and check back soon — new firms are added regularly.<div style={{ marginTop: 12 }}><Link href={cta} className="legal-outlinebtn">Describe your case first</Link></div></div>
           ) : (
             <>
               <div className="legal-firm-list">
