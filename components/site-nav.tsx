@@ -7,13 +7,22 @@ import { LogoutButton } from "./logout-button";
 import { ThemeSwitcher } from "./theme-switcher";
 
 export function SiteNav() {
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     async function check() {
       const supabase = createClient();
       const { data } = await supabase.auth.getUser();
-      setLoggedIn(!!data.user);
+      if (!data.user) {
+        setRole(null);
+        return;
+      }
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .single();
+      setRole(profile?.role ?? "client");
     }
     check();
   }, []);
@@ -26,8 +35,11 @@ export function SiteNav() {
       <div className="legal-navlinks">
         <Link href="/#how">How it works</Link>
         <Link href="/marketplace">Explore firms</Link>
+        {role === "client" && <Link href="/bookings">My requests</Link>}
+        {role === "firm" && <Link href="/firm/dashboard">Firm dashboard</Link>}
+        {role === "admin" && <Link href="/dashboard">Admin</Link>}
         <Link href="/#about">Our approach</Link>
-        {loggedIn ? (
+        {role ? (
           <LogoutButton />
         ) : (
           <>

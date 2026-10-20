@@ -16,6 +16,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+type AccountRole = "client" | "firm";
+
 export function SignUpForm({
   className,
   ...props
@@ -23,6 +25,7 @@ export function SignUpForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+  const [role, setRole] = useState<AccountRole>("client");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -44,7 +47,12 @@ export function SignUpForm({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm?next=/marketplace`,
+          // Stored in raw_user_meta_data; the onboarding page promotes the
+          // profile to role='firm' after sign-in (admins stay manual).
+          data: { account_role: role },
+          emailRedirectTo: `${window.location.origin}/auth/confirm?next=${
+            role === "firm" ? "/firm/onboarding" : "/marketplace"
+          }`,
         },
       });
       if (error) throw error;
@@ -61,11 +69,46 @@ export function SignUpForm({
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Sign up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
+          <CardDescription>
+            Create an account as a client or a law firm
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignUp}>
             <div className="flex flex-col gap-6">
+              <div className="grid gap-2">
+                <Label>I am signing up as</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setRole("client")}
+                    className={`rounded-md border px-3 py-2 text-sm font-semibold transition-colors ${
+                      role === "client"
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-input bg-background hover:bg-accent"
+                    }`}
+                  >
+                    Client
+                    <span className="block text-xs font-normal opacity-80">
+                      Need legal help
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRole("firm")}
+                    className={`rounded-md border px-3 py-2 text-sm font-semibold transition-colors ${
+                      role === "firm"
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-input bg-background hover:bg-accent"
+                    }`}
+                  >
+                    Law firm
+                    <span className="block text-xs font-normal opacity-80">
+                      Offer legal services
+                    </span>
+                  </button>
+                </div>
+              </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
