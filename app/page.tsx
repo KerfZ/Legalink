@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SiteNav } from "@/components/site-nav";
 import { createClient } from "@/lib/supabase/server";
 import { formatRange } from "@/lib/legalink";
+import { RecommendationCarousel, type CarouselFirm } from "@/components/recommendation-carousel";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -34,6 +35,12 @@ export default async function Home() {
     .select("firm_id, google_rating, in_house_rating, review_count");
   const ratingMap = new Map<number, RatingRow>();
   for (const r of (ratingRows ?? []) as RatingRow[]) ratingMap.set(r.firm_id, r);
+
+  // Merge in-house ratings into the hero firms for the carousel.
+  const heroFirms = (previewFirms ?? []).map((f: CarouselFirm) => {
+    const rr = ratingMap.get(f.id);
+    return { ...f, in_house_rating: rr?.in_house_rating ?? null, review_count: rr?.review_count ?? null };
+  });
 
   return (
     <>
@@ -78,62 +85,7 @@ export default async function Home() {
                 </span>
               </div>
             ) : (
-              previewFirms.map((f) => {
-                const rr = ratingMap.get(f.id);
-                const google = f.google_rating ?? rr?.google_rating ?? null;
-                return (
-                  <div className="legal-match" key={f.id} style={{ display: "block", marginTop: 10 }}>
-                    <div className="legal-match-head">
-                      {f.logo_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={f.logo_url} alt="" width={40} height={40} style={{ width: 40, height: 40, borderRadius: 10, objectFit: "cover" }} />
-                      ) : (
-                        <div className="legal-firmmark">{f.initials}</div>
-                      )}
-                      <div>
-                        <strong>
-                          {f.name}
-                          {f.is_verified && (
-                            <span className="legal-tag" style={{ marginLeft: 6, background: "#1a7f37", color: "#ffffff" }}>Verified</span>
-                          )}
-                          {f.is_featured && (
-                            <span className="legal-tag" style={{ marginLeft: 6, background: "var(--gold)", color: "var(--on-gold)" }}>Featured</span>
-                          )}
-                        </strong>
-                        <small>
-                          {f.area ? `${f.area} · ` : ""}{f.practice_area} · {f.complexity} complexity
-                          {f.operating_hours ? ` · ${f.operating_hours}` : ""}
-                        </small>
-                      </div>
-                      <div className="price">{formatRange(f.price_min, f.price_max)}<small>estimated range</small></div>
-                    </div>
-                    <p
-                      style={{
-                        fontSize: 13,
-                        color: "var(--on-gold-muted)",
-                        margin: "8px 0",
-                        lineHeight: 1.5,
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                      }}
-                    >
-                      {f.description}
-                    </p>
-                    <div className="legal-match-foot">
-                      {(f.tags ?? []).slice(0, 2).map((t: string) => (<span className="legal-tag" key={t}>{t}</span>))}
-                      <span className="legal-tag">★ {google ? Number(google).toFixed(1) : "New"}</span>
-                      {rr?.in_house_rating != null && (
-                        <span className="legal-tag">★ Legal!nk {Number(rr.in_house_rating).toFixed(1)} ({rr.review_count})</span>
-                      )}
-                      <Link href={`/firms/${f.id}`} className="legal-tag" style={{ marginLeft: "auto" }}>
-                        View profile →
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })
+              <RecommendationCarousel firms={heroFirms} />
             )}
           </div>
         </section>
