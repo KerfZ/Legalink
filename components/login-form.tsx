@@ -26,7 +26,7 @@ export function LoginForm({
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/marketplace";
+  const next = searchParams.get("next") ?? "/";
 
   const handleLogin = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,7 +40,8 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      // Honor ?next= from force-login redirect, default to marketplace.
+      // Honor ?next= from force-login redirect; after email confirmation
+      // clients land on the front page, firms on firm onboarding.
       router.push(next);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");

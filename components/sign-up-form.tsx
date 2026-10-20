@@ -54,7 +54,7 @@ export function SignUpForm({
           // profile to role='firm' after sign-in (admins stay manual).
           data: { account_role: role, full_name: fullName.trim(), phone: phone.trim() },
           emailRedirectTo: `${window.location.origin}/auth/confirm?next=${
-            role === "firm" ? "/firm/onboarding" : "/marketplace"
+            role === "firm" ? "/firm/onboarding" : "/"
           }`,
         },
       });

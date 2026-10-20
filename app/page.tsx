@@ -9,12 +9,31 @@ export default async function Home() {
   const user = data?.claims;
   const cta = user ? "/start-case" : "/auth/login?next=/start-case";
 
+  // Hero recommendations: featured first, then verified, then newest.
   const { data: previewFirms } = await supabase
     .from("firms")
-    .select("id,name,initials,practice_area,complexity,price_min,price_max,description,tags")
+    .select(
+      "id,name,initials,practice_area,complexity,price_min,price_max,description,tags,area,operating_hours,google_rating,is_featured,is_verified,logo_url",
+    )
     .eq("is_published", true)
+    .order("is_featured", { ascending: false })
+    .order("is_verified", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(3);
+
+  // Aggregated ratings (Google + verified in-house) from the firm_ratings
+  // view. The view is authenticated-only, so anonymous visitors get none.
+  type RatingRow = {
+    firm_id: number;
+    google_rating: number | null;
+    in_house_rating: number | null;
+    review_count: number;
+  };
+  const { data: ratingRows } = await supabase
+    .from("firm_ratings")
+    .select("firm_id, google_rating, in_house_rating, review_count");
+  const ratingMap = new Map<number, RatingRow>();
+  for (const r of (ratingRows ?? []) as RatingRow[]) ratingMap.set(r.firm_id, r);
 
   return (
     <>
@@ -36,19 +55,86 @@ export default async function Home() {
           </div>
           <div className="legal-hero-card">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span className="legal-pill">A SMARTER WAY TO CONNECT</span>
+              <span className="legal-pill">RECOMMENDED ON LEGAL!NK</span>
               <span style={{ fontSize: 26, color: "var(--pill-fg)" }}>✳</span>
             </div>
-            <h2 style={{ fontSize: 28, lineHeight: 1.1, margin: "38px 0 8px" }}>Less uncertainty.<br />More clarity.</h2>
-            <div style={{ fontSize: 13, color: "var(--on-gold-muted)" }}>A preview of how Legal!nk makes options easier to compare.</div>
-            <div className="legal-match">
-              <div className="legal-match-head">
-                <div className="legal-firmmark">N&C</div>
-                <div><strong>North & Co. Legal</strong><small>Business contracts · Emerging firm</small></div>
-                <div className="price">Rp1.5–3m<small>illustrative range</small></div>
-              </div>
-              <div className="legal-match-foot"><span className="legal-tag">SME-friendly</span><span className="legal-tag">Transparent estimate</span><span className="legal-tag">Case fit: High</span></div>
+            <h2 style={{ fontSize: 26, lineHeight: 1.1, margin: "24px 0 6px" }}>Less uncertainty.<br />More clarity.</h2>
+            <div style={{ fontSize: 13, color: "var(--on-gold-muted)", marginBottom: 14 }}>
+              Featured &amp; verified firms, live from the marketplace.
             </div>
+
+            {!user ? (
+              <div className="legal-match" style={{ display: "block" }}>
+                <strong style={{ fontSize: 15 }}>See real firms with transparent prices.</strong>
+                <p style={{ fontSize: 13, color: "var(--on-gold-muted)", margin: "8px 0 14px", lineHeight: 1.5 }}>
+                  Log in to browse recommended law firms — profiles, price ranges, ratings, and verified credentials.
+                </p>
+                <Link href="/auth/login?next=/" className="legal-secondary">Log in to see firms</Link>
+              </div>
+            ) : !previewFirms || previewFirms.length === 0 ? (
+              <div className="legal-match" style={{ display: "block" }}>
+                <span style={{ fontSize: 13, color: "var(--on-gold-muted)" }}>
+                  No firms published yet — new firms are added regularly.
+                </span>
+              </div>
+            ) : (
+              previewFirms.map((f) => {
+                const rr = ratingMap.get(f.id);
+                const google = f.google_rating ?? rr?.google_rating ?? null;
+                return (
+                  <div className="legal-match" key={f.id} style={{ display: "block", marginTop: 10 }}>
+                    <div className="legal-match-head">
+                      {f.logo_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={f.logo_url} alt="" width={40} height={40} style={{ width: 40, height: 40, borderRadius: 10, objectFit: "cover" }} />
+                      ) : (
+                        <div className="legal-firmmark">{f.initials}</div>
+                      )}
+                      <div>
+                        <strong>
+                          {f.name}
+                          {f.is_verified && (
+                            <span className="legal-tag" style={{ marginLeft: 6, background: "#1a7f37", color: "#ffffff" }}>Verified</span>
+                          )}
+                          {f.is_featured && (
+                            <span className="legal-tag" style={{ marginLeft: 6, background: "var(--gold)", color: "var(--on-gold)" }}>Featured</span>
+                          )}
+                        </strong>
+                        <small>
+                          {f.area ? `${f.area} · ` : ""}{f.practice_area} · {f.complexity} complexity
+                          {f.operating_hours ? ` · ${f.operating_hours}` : ""}
+                        </small>
+                      </div>
+                      <div className="price">{formatRange(f.price_min, f.price_max)}<small>estimated range</small></div>
+                    </div>
+                    <p
+                      style={{
+                        fontSize: 13,
+                        color: "var(--on-gold-muted)",
+                        margin: "8px 0",
+                        lineHeight: 1.5,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {f.description}
+                    </p>
+                    <div className="legal-match-foot">
+                      {(f.tags ?? []).slice(0, 2).map((t: string) => (<span className="legal-tag" key={t}>{t}</span>))}
+                      <span className="legal-tag">★ {google ? Number(google).toFixed(1) : "New"}</span>
+                      {rr?.in_house_rating != null && (
+                        <span className="legal-tag">★ Legal!nk {Number(rr.in_house_rating).toFixed(1)} ({rr.review_count})</span>
+                      )}
+                      <Link href={`/firms/${f.id}`} className="legal-tag" style={{ marginLeft: "auto" }}>
+                        View profile →
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </section>
 
