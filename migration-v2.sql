@@ -1,4 +1,4 @@
--- Legal!nk V2 migration â€” run ONCE in Supabase SQL Editor on the live DB.
+-- Legal!nk V2 migration Ã¢â‚¬â€ run ONCE in Supabase SQL Editor on the live DB.
 -- Adds: firm role + firm onboarding fields, case intake v2 fields,
 --       booking/counter-offer engine, transactions (20% platform fee),
 --       document vault, verified client reviews + firm_ratings view.
@@ -124,7 +124,7 @@ from public.firms f
 left join public.reviews r on r.firm_id = f.id
 group by f.id, f.google_rating;
 
--- 9) RLS â€” firms: firm owners manage their own listing; everyone reads published.
+-- 9) RLS Ã¢â‚¬â€ firms: firm owners manage their own listing; everyone reads published.
 drop policy if exists "owners read own firms" on public.firms;
 create policy "owners read own firms"
   on public.firms for select to authenticated
@@ -286,3 +286,21 @@ grant all on public.reviews to authenticated;
 -- 12) Promote a user to firm admin (or use the firm onboarding flow which
 --     auto-sets role='firm' on first sign-in via the onboarding page):
 -- update public.profiles set role = 'firm' where id = 'PASTE-USER-UUID';
+-- 15) handle_new_user: honor the sign-up role picker (account_role metadata).
+--     Only 'client' and 'firm' are ever self-settable; admin stays manual.
+--     Re-runnable (create or replace).
+create or replace function public.handle_new_user()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  intended_role text;
+begin
+  intended_role := coalesce(new.raw_user_meta_data ->> 'account_role', 'client');
+  if intended_role not in ('client', 'firm') then
+    intended_role := 'client';
+  end if;
+  insert into public.profiles (id, display_name, role)
+  values (new.id, split_part(new.email, '@', 1), intended_role)
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;

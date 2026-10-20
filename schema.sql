@@ -1,4 +1,4 @@
--- Legal!nk V2 — run this in a BRAND-NEW Supabase project > SQL Editor
+-- Legal!nk V2 â€” run this in a BRAND-NEW Supabase project > SQL Editor
 -- Flow: signup (client | firm) -> multi-step case intake -> recommended firms
 --   -> booking request -> firm counter-offer -> accept -> VA/QRIS checkout
 --   -> document vault unlocked on PAID -> verified client review.
@@ -134,9 +134,18 @@ group by f.id, f.google_rating;
 -- 9) auto-create profile on signup.
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  intended_role text;
 begin
-  insert into public.profiles (id, display_name)
-  values (new.id, split_part(new.email, '@', 1))
+  -- Role comes from sign-up metadata (account_role set by the sign-up form).
+  -- Only 'client' and 'firm' can ever be self-selected — 'admin' can only be
+  -- granted manually by an existing admin.
+  intended_role := coalesce(new.raw_user_meta_data ->> 'account_role', 'client');
+  if intended_role not in ('client', 'firm') then
+    intended_role := 'client';
+  end if;
+  insert into public.profiles (id, display_name, role)
+  values (new.id, split_part(new.email, '@', 1), intended_role)
   on conflict (id) do nothing;
   return new;
 end;
@@ -145,7 +154,7 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users for each row execute function public.handle_new_user();
 
--- 10) RLS — profiles: users read own; update own display_name only (role locked).
+-- 10) RLS â€” profiles: users read own; update own display_name only (role locked).
 create policy "users read own profile"
   on public.profiles for select to authenticated using (auth.uid() = id);
 create policy "users update own display_name"

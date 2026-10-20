@@ -3,99 +3,101 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 45 54% 35%;     /* Rich gold for primary buttons/accents */
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 45 54% 35%;      /* Gold accent */
-    --accent-foreground: 0 0% 98%;
+    :root {
+    --background: 30 33% 95%;   /* Warm cream */
+    --foreground: 16 63% 8%;    /* Licorice brown-black */
+    --card: 34 50% 99%;
+    --card-foreground: 16 63% 8%;
+    --popover: 34 50% 99%;
+    --popover-foreground: 16 63% 8%;
+    --primary: 25 63% 26%;      /* Koacha brown */
+    --primary-foreground: 33 30% 97%;
+    --secondary: 30 30% 92%;
+    --secondary-foreground: 16 50% 15%;
+    --muted: 30 25% 92%;
+    --muted-foreground: 24 22% 40%;
+    --accent: 25 55% 30%;
+    --accent-foreground: 33 30% 97%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 45 54% 35%;        /* Gold ring/focus */
-    --chart-1: 45 85% 50%;     /* Gold */
-    --chart-2: 25 85% 55%;     /* Amber */
-    --chart-3: 35 90% 60%;     /* Light gold */
-    --chart-4: 40 75% 35%;     /* Dark amber */
-    --chart-5: 20 80% 65%;     /* Bronze */
+    --border: 30 22% 88%;
+    --input: 30 22% 88%;
+    --ring: 25 63% 26%;
+    --chart-1: 25 63% 26%;      /* Koacha */
+    --chart-2: 22 29% 51%;      /* Chamoisee */
+    --chart-3: 30 45% 65%;      /* Light tan */
+    --chart-4: 16 63% 15%;      /* Black bean */
+    --chart-5: 28 35% 40%;      /* Mid brown */
     --radius: 0.5rem;
-    --ink: #1a1a2e;            /* Deep charcoal for professional text */
-    --gold: #b8860b;           /* Dark gold - primary brand color */
-    --gold-light: #e6c227;     /* Medium gold for accents/hover */
-    --gold-bright: #ffd700;    /* Bright gold for highlights */
-    --gold-bg: #f5f2ec;        /* Warm off-white background (slightly darker) */
-    --paper: #fdfaf5;          /* Softer cream for subtle surfaces */
-    --muted-legal: #7a7265;    /* Warm medium gray for muted text */
-    --line: #e8e0d0;           /* Soft gold-beige border */
-    --nav-bg: rgba(245,242,236,.96);
+    --ink: #230f08;             /* Licorice - near-black brown text */
+    --gold: #6e3c19;            /* Koacha brown - primary brand color */
+    --gold-light: #8a5a3b;      /* Lighter Koacha - hover */
+    --gold-bright: #a7795e;     /* Chamoisee - highlights */
+    --gold-bg: #f4efe9;         /* Warm cream background */
+    --bg-end: #ebe0d3;          /* Page background gradient end */
+    --paper: #fbf8f3;           /* Softer cream for subtle surfaces */
+    --muted-legal: #6e5a48;     /* Warm brown-gray for muted text */
+    --line: #e0d3c2;            /* Soft tan border */
+    --nav-bg: rgba(244,239,233,.96);
     --card-bg: #ffffff;
-    --chip-bg: #fff4e5;
-    --notice-bg: #fff8e1;
-    --notice-text: #8b7d5a;
-    --avatar-bg: #f0e6d2;
-    /* Text placed ON the gold card/buttons */
+    --chip-bg: #f0e6d9;
+    --notice-bg: #f5ede1;
+    --notice-text: #5e4a38;
+    --avatar-bg: #e8dcc8;
+    /* Text placed ON the brown card/buttons */
     --on-gold: #ffffff;
-    --on-gold-muted: #b8a98a;
-    --pill-bg: rgba(255,255,255,.12);
-    --pill-fg: #ffd700;
+    --on-gold-muted: #e3cdb8;
+    --pill-bg: rgba(255,255,255,.14);
+    --pill-fg: #efdcc8;
   }
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 45 54% 35%;      /* Gold primary in dark mode */
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 45 54% 35%;       /* Gold accent in dark mode */
-    --accent-foreground: 0 0% 98%;
+    .dark {
+    --background: 17 65% 4%;    /* Smoky black */
+    --foreground: 28 40% 88%;   /* Warm light brown */
+    --card: 16 63% 8%;          /* Licorice */
+    --card-foreground: 28 40% 88%;
+    --popover: 16 63% 8%;
+    --popover-foreground: 28 40% 88%;
+    --primary: 22 35% 55%;      /* Chamoisee brown */
+    --primary-foreground: 16 60% 7%;
+    --secondary: 15 60% 13%;    /* Black bean */
+    --secondary-foreground: 28 40% 85%;
+    --muted: 15 50% 12%;
+    --muted-foreground: 25 28% 63%;
+    --accent: 22 35% 55%;
+    --accent-foreground: 16 60% 7%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 45 54% 35%;         /* Gold ring in dark mode */
-    --chart-1: 45 85% 50%;
-    --chart-2: 25 85% 55%;
-    --chart-3: 35 90% 60%;
-    --chart-4: 40 75% 35%;
-    --chart-5: 20 80% 65%;
+    --border: 17 45% 15%;
+    --input: 17 45% 15%;
+    --ring: 22 35% 55%;
+    --chart-1: 22 29% 51%;      /* Chamoisee */
+    --chart-2: 25 63% 26%;      /* Koacha */
+    --chart-3: 30 45% 65%;      /* Light tan */
+    --chart-4: 15 60% 13%;      /* Black bean */
+    --chart-5: 28 35% 40%;      /* Mid brown */
 
-    /* Gold theme dark mode overrides */
-    --ink: #f5f1ea;
-    --gold: #e6c227;
-    --gold-light: #f2d85a;
-    --gold-bright: #ffd700;
-    --gold-bg: #1a1a2e;
-    --paper: #252535;
-    --muted-legal: #a8a192;
-    --line: #3d3629;
-    --nav-bg: rgba(26,26,46,.96);
-    --card-bg: #252535;
-    --chip-bg: #2a2418;
-    --notice-bg: #2a251e;
-    --notice-text: #c9bdaa;
-    --avatar-bg: #3d3529;
+    /* Brown palette dark mode overrides */
+    --ink: #efe4d8;
+    --gold: #a7795e;            /* Chamoisee */
+    --gold-light: #c08a66;
+    --gold-bright: #d9b294;
+    --gold-bg: #110703;         /* Smoky black */
+    --bg-end: #1c0b04;
+    --paper: #230f08;           /* Licorice */
+    --muted-legal: #ad8b70;
+    --line: #3e2314;
+    --nav-bg: rgba(17,7,3,.96);
+    --card-bg: #230f08;
+    --chip-bg: #34170d;         /* Black bean */
+    --notice-bg: #2a140b;
+    --notice-text: #c9a184;
+    --avatar-bg: #46281a;
 
-    /* On-gold text flips dark: dark-mode gold card is bright yellow */
-    --on-gold: #1a1a2e;
-    --on-gold-muted: rgba(26,26,46,.78);
-    --pill-bg: rgba(26,26,46,.18);
-    --pill-fg: #1a1a2e;
+    /* On-brown text flips dark: dark-mode card is Chamoisee (lighter) */
+    --on-gold: #230f08;
+    --on-gold-muted: #1c0b04;
+    --pill-bg: rgba(17,7,3,.22);
+    --pill-fg: #230f08;
   }
 }
 
@@ -104,7 +106,8 @@
     @apply border-border;
   }
   body {
-    background: var(--gold-bg);
+    background: linear-gradient(180deg, var(--gold-bg) 0%, var(--bg-end) 100%);
+    background-attachment: fixed;
     color: var(--ink);
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   }
@@ -113,7 +116,7 @@
 .legal-wrap { max-width: 1180px; margin: auto; padding: 0 28px; }
 .legal-nav { height: 78px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); background: var(--nav-bg); position: sticky; top: 0; z-index: 5; padding: 0 max(28px, calc((100vw - 1180px)/2)); }
 .legal-logo { font-size: 25px; font-weight: 900; letter-spacing: -1.5px; color: var(--gold); text-decoration: none; }
-.legal-logo span { color: #e6c227; }
+.legal-logo span { color: var(--gold-bright); }
 .legal-navlinks { display: flex; gap: 22px; align-items: center; font-size: 13px; font-weight: 650; }
 .legal-navlinks a { color: var(--ink); text-decoration: none; }
 .legal-btn, .legal-primary { background: var(--gold); color: var(--on-gold); border: 0; border-radius: 999px; padding: 12px 18px; font-weight: 750; text-decoration: none; display: inline-block; }

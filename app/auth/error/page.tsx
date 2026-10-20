@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 import { Suspense } from "react";
 
 async function ErrorContent({
@@ -7,18 +8,37 @@ async function ErrorContent({
   searchParams: Promise<{ error: string }>;
 }) {
   const params = await searchParams;
+  const raw = params?.error ?? "";
+
+  // Map the most common causes to actionable guidance.
+  let guidance = "Something went wrong while confirming your account.";
+  if (raw === "No token hash or type") {
+    guidance =
+      "The confirmation link looks incomplete — this happens if the URL is opened directly or truncated. Open the latest confirmation email and click the link again, or resend it below.";
+  } else if (/expired/i.test(raw)) {
+    guidance =
+      "This confirmation link has expired. Confirmation links are short-lived — request a fresh one from the sign-up success page.";
+  } else if (/invalid/i.test(raw)) {
+    guidance =
+      "This link is invalid or was already used. If you just confirmed, try logging in directly.";
+  }
 
   return (
     <>
-      {params?.error ? (
-        <p className="text-sm text-muted-foreground">
-          Code error: {params.error}
-        </p>
-      ) : (
-        <p className="text-sm text-muted-foreground">
-          An unspecified error occurred.
+      <p className="text-sm text-muted-foreground">{guidance}</p>
+      {raw && (
+        <p className="mt-3 rounded-md bg-accent p-2 text-xs font-mono">
+          Code error: {raw}
         </p>
       )}
+      <div className="mt-4 flex flex-col gap-2 text-sm">
+        <Link href="/auth/login" className="underline underline-offset-4">
+          Back to login
+        </Link>
+        <Link href="/auth/sign-up-success" className="underline underline-offset-4">
+          Resend confirmation email
+        </Link>
+      </div>
     </>
   );
 }
@@ -35,7 +55,7 @@ export default function Page({
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl">
-                Sorry, something went wrong.
+                Account confirmation failed
               </CardTitle>
             </CardHeader>
             <CardContent>
