@@ -252,6 +252,9 @@ function MarketplaceContent() {
                         {f.is_featured && (
                           <span className="legal-tag" style={{ marginLeft: 8, background: "var(--gold)", color: "var(--on-gold)" }}>Featured</span>
                         )}
+                        {f.is_verified && (
+                          <span className="legal-tag" style={{ marginLeft: 8, background: "#1a7f37", color: "#ffffff" }}>Verified</span>
+                        )}
                       </h3>
                       <p className="desc">{f.description}</p>
                       <div style={{ fontSize: 12, color: "var(--muted-legal)", marginBottom: 8 }}>
@@ -262,6 +265,9 @@ function MarketplaceContent() {
                         <span>{f.complexity} complexity</span>
                         {(f.tags ?? []).slice(0, 2).map((t) => (<span key={t}>{t}</span>))}
                       </div>
+                      {f.operating_hours && (
+                        <div style={{ fontSize: 12, color: "var(--muted-legal)", marginTop: 6 }}>{f.operating_hours}</div>
+                      )}
                     </div>
                     <div className="legal-firm-right">
                       <strong>{formatRange(f.price_min, f.price_max)}</strong>

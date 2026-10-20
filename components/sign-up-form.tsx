@@ -20,12 +20,15 @@ type AccountRole = "client" | "firm";
 
 export function SignUpForm({
   className,
+  initialRole = "client",
   ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+}: React.ComponentPropsWithoutRef<"div"> & { initialRole?: AccountRole }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
-  const [role, setRole] = useState<AccountRole>("client");
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [role, setRole] = useState<AccountRole>(initialRole);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -49,7 +52,7 @@ export function SignUpForm({
         options: {
           // Stored in raw_user_meta_data; the onboarding page promotes the
           // profile to role='firm' after sign-in (admins stay manual).
-          data: { account_role: role },
+          data: { account_role: role, full_name: fullName.trim(), phone: phone.trim() },
           emailRedirectTo: `${window.location.origin}/auth/confirm?next=${
             role === "firm" ? "/firm/onboarding" : "/marketplace"
           }`,
@@ -110,6 +113,17 @@ export function SignUpForm({
                 </div>
               </div>
               <div className="grid gap-2">
+                <Label htmlFor="full-name">Full name (as on your government ID)</Label>
+                <Input
+                  id="full-name"
+                  type="text"
+                  placeholder="Jane Doe"
+                  required
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
@@ -118,6 +132,17 @@ export function SignUpForm({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="phone">Phone / WhatsApp</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+62 812 3456 7890"
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">

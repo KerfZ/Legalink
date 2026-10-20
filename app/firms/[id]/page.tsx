@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SiteNav } from "@/components/site-nav";
-import { formatRange } from "@/lib/legalink";
+import { formatRange, formatDateTime, googleMapsDirectionsUrl, googleMapsUrl } from "@/lib/legalink";
 
 export default async function FirmPage({
   params,
@@ -26,6 +26,12 @@ export default async function FirmPage({
     .eq("firm_id", id)
     .maybeSingle();
   const ratings = ratingRows as { google_rating: number | null; in_house_rating: number | null; review_count: number } | null;
+  const { data: reviewRows } = await supabase
+    .from("reviews")
+    .select("id, rating, comment, created_at")
+    .eq("firm_id", id)
+    .order("created_at", { ascending: false });
+  const reviews = (reviewRows ?? []) as { id: string; rating: number; comment: string | null; created_at: string }[];
 
   return (
     <>
@@ -41,7 +47,14 @@ export default async function FirmPage({
               <div className="legal-firmmark" style={{ width: 56, height: 56 }}>{firm.initials}</div>
             )}
             <div>
-              <h1 style={{ margin: 0, letterSpacing: -1 }}>{firm.name}</h1>
+              <h1 style={{ margin: 0, letterSpacing: -1 }}>
+                {firm.name}
+                {firm.is_verified && (
+                  <span style={{ fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 999, background: "#1a7f37", color: "#ffffff", marginLeft: 10, verticalAlign: "middle" }}>
+                    Verified
+                  </span>
+                )}
+              </h1>
               <p className="legal-tiny">
                 {firm.area ? `ðŸ“ ${firm.area} Â· ` : ""}{firm.practice_area} Â· {firm.complexity} complexity
               </p>
@@ -54,6 +67,10 @@ export default async function FirmPage({
           <div className="legal-howrow" style={{ marginTop: 16 }}>
             <span>Estimated price</span>
             <strong>{formatRange(firm.price_min, firm.price_max)}</strong>
+          </div>
+          <div className="legal-howrow">
+            <span>Working hours</span>
+            <strong>{firm.operating_hours || "-"}</strong>
           </div>
           <div className="legal-howrow">
             <span>Google review score</span>
@@ -88,10 +105,34 @@ export default async function FirmPage({
           {firm.office_address && (
             <div className="legal-howrow"><span>Office address</span><strong>{firm.office_address}</strong></div>
           )}
+          <div style={{ display: "flex", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
+            <a href={googleMapsUrl(firm)} target="_blank" rel="noopener noreferrer" className="legal-outlinebtn">
+              Open in Google Maps
+            </a>
+            <a href={googleMapsDirectionsUrl(firm)} target="_blank" rel="noopener noreferrer" className="legal-outlinebtn">
+              Get directions
+            </a>
+          </div>
           <div className="legal-howrow"><span>Contact person</span><strong>{firm.contact_name || "â€”"}</strong></div>
           <div className="legal-howrow"><span>Email</span><strong>{firm.contact_email || "â€”"}</strong></div>
           <div className="legal-howrow"><span>Phone</span><strong>{firm.contact_phone || "â€”"}</strong></div>
           <p className="legal-tiny">Confirm scope, availability, and fees directly with the firm.</p>
+        </div>
+
+        <div className="legal-panel" style={{ marginTop: 16 }}>
+          <div className="legal-eyebrow">Verified client reviews</div>
+          {reviews.length === 0 && (
+            <p className="legal-tiny">No reviews yet - reviews appear after a paid consultation.</p>
+          )}
+          {reviews.map((r) => (
+            <div key={r.id} style={{ borderTop: "1px solid var(--line)", padding: "12px 0" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+                <strong style={{ color: "var(--gold)" }}>{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</strong>
+                <span className="legal-tiny">{formatDateTime(r.created_at)}</span>
+              </div>
+              {r.comment && <p style={{ lineHeight: 1.6, margin: "6px 0 0" }}>{r.comment}</p>}
+            </div>
+          ))}
         </div>
       </main>
     </>

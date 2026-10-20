@@ -27,6 +27,31 @@ const STATUS_FG: Record<string, string> = {
   REJECTED: "#ffffff",
 };
 
+function StarPicker({ value, onChange }: { value: number; onChange: (n: number) => void }) {
+  return (
+    <div style={{ display: "flex", gap: 4 }}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button
+          key={n}
+          type="button"
+          aria-label={`${n} star${n > 1 ? "s" : ""}`}
+          onClick={() => onChange(n)}
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            fontSize: 24,
+            lineHeight: 1,
+            color: n <= value ? "var(--gold)" : "var(--line)",
+          }}
+        >
+          ★
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function BookingsPage() {
   const router = useRouter();
   const [bookings, setBookings] = useState<BookingOffer[]>([]);
@@ -34,6 +59,15 @@ export default function BookingsPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [acting, setActing] = useState<string | null>(null);
+  // Payment status + this client's reviews (drive the review prompt).
+  const [txMap, setTxMap] = useState<Record<string, string>>({});
+  const [reviewMap, setReviewMap] = useState<Record<string, { id: string; rating: number; comment: string | null }>>({});
+
+  // Review form state.
+  const [reviewFor, setReviewFor] = useState<string | null>(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [reviewSaving, setReviewSaving] = useState(false);
 
   async function refresh() {
     const supabase = createClient();
@@ -49,6 +83,17 @@ export default function BookingsPage() {
       .order("created_at", { ascending: false });
     if (err) setError(err.message);
     else setBookings((data ?? []) as BookingOffer[]);
+    // Payment status + my reviews, so paid bookings can leave/edit a review.
+    const [{ data: txs }, { data: revs }] = await Promise.all([
+      supabase.from("transactions").select("booking_offer_id, payment_status").eq("client_id", userData.user.id),
+      supabase.from("reviews").select("id, booking_offer_id, rating, comment").eq("client_id", userData.user.id),
+    ]);
+    setTxMap(Object.fromEntries((txs ?? []).map((t) => [t.booking_offer_id, t.payment_status])));
+    setReviewMap(
+      Object.fromEntries(
+        (revs ?? []).map((r) => [r.booking_offer_id, { id: r.id, rating: r.rating, comment: r.comment }]),
+      ),
+    );
     setLoading(false);
   }
 
@@ -76,6 +121,40 @@ export default function BookingsPage() {
     }
     await refresh();
     setActing(null);
+  }
+
+  // Insert (or edit) a review. RLS only allows this after a SUCCESS payment,
+  // one review per booking (unique constraint on booking_offer_id).
+  async function submitReview(b: BookingOffer) {
+    if (reviewRating < 1) return;
+    setReviewSaving(true);
+    setError("");
+    const supabase = createClient();
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) {
+      router.push("/auth/login?next=/bookings");
+      return;
+    }
+    const existing = reviewMap[b.id];
+    const { error: err } = existing
+      ? await supabase
+          .from("reviews")
+          .update({ rating: reviewRating, comment: reviewText.trim() })
+          .eq("id", existing.id)
+      : await supabase.from("reviews").insert({
+          firm_id: b.firm_id,
+          client_id: userData.user.id,
+          booking_offer_id: b.id,
+          rating: reviewRating,
+          comment: reviewText.trim(),
+        });
+    if (err) setError(err.message);
+    else {
+      setReviewFor(null);
+      setNotice("Thanks! Your review is now live on the firm's profile.");
+      await refresh();
+    }
+    setReviewSaving(false);
   }
 
   return (
@@ -187,6 +266,75 @@ export default function BookingsPage() {
                   <Link href={`/marketplace?case=${b.case_id}`} className="legal-outlinebtn">
                     ← Back to recommended firms
                   </Link>
+                </div>
+              )}
+
+              {txMap[b.id] === "SUCCESS" && (
+                <div style={{ marginTop: 12, borderTop: "1px solid var(--line)", paddingTop: 10 }}>
+                  {!reviewMap[b.id] && reviewFor !== b.id && (
+                    <button
+                      className="legal-outlinebtn"
+                      onClick={() => {
+                        setReviewFor(b.id);
+                        setReviewRating(0);
+                        setReviewText("");
+                      }}
+                    >
+                      Leave a review
+                    </button>
+                  )}
+                  {reviewMap[b.id] && reviewFor !== b.id && (
+                    <div>
+                      <div className="legal-tiny" style={{ margin: 0 }}>
+                        Your review:{" "}
+                        <strong style={{ color: "var(--gold)" }}>
+                          {"★".repeat(reviewMap[b.id].rating)}
+                          {"☆".repeat(5 - reviewMap[b.id].rating)}
+                        </strong>
+                        {reviewMap[b.id].comment ? ` — ${reviewMap[b.id].comment}` : ""}
+                      </div>
+                      <button
+                        className="legal-outlinebtn"
+                        style={{ marginTop: 8 }}
+                        onClick={() => {
+                          setReviewFor(b.id);
+                          setReviewRating(reviewMap[b.id].rating);
+                          setReviewText(reviewMap[b.id].comment ?? "");
+                        }}
+                      >
+                        Edit review
+                      </button>
+                    </div>
+                  )}
+                  {reviewFor === b.id && (
+                    <div>
+                      <div className="legal-field">
+                        <label>YOUR RATING</label>
+                        <StarPicker value={reviewRating} onChange={setReviewRating} />
+                      </div>
+                      <div className="legal-field">
+                        <label>REVIEW (OPTIONAL)</label>
+                        <textarea
+                          rows={3}
+                          value={reviewText}
+                          onChange={(e) => setReviewText(e.target.value)}
+                          placeholder="How did the consultation go?"
+                        />
+                      </div>
+                      <div style={{ display: "flex", gap: 10 }}>
+                        <button
+                          className="legal-primary"
+                          disabled={reviewSaving || reviewRating < 1}
+                          onClick={() => submitReview(b)}
+                        >
+                          {reviewSaving ? "Saving..." : "Submit review"}
+                        </button>
+                        <button className="legal-secondary" onClick={() => setReviewFor(null)}>
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </article>

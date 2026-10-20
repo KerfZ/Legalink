@@ -20,6 +20,11 @@ export type Firm = {
   contact_name?: string | null;
   contact_email?: string | null;
   contact_phone?: string | null;
+  operating_hours?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  is_verified?: boolean | null;
+  credentials_url?: string | null;
   is_published: boolean;
   created_at?: string;
   // joined from firm_ratings view
@@ -212,4 +217,47 @@ export function bookingStatusLabel(s: BookingStatus): string {
     case "REJECTED":
       return "Rejected";
   }
+}
+
+// --- Google Maps links (free URL scheme, no API key required) ---
+type FirmLocation = Pick<Firm, "lat" | "lng" | "office_address" | "area" | "name">;
+
+// Search link: coordinates when present, otherwise the address text (Google
+// resolves it server-side).
+export function googleMapsUrl(firm: FirmLocation): string {
+  if (firm.lat != null && firm.lng != null) {
+    return `https://www.google.com/maps/search/?api=1&query=${firm.lat},${firm.lng}`;
+  }
+  const address = [firm.office_address, firm.area].filter(Boolean).join(", ") || firm.name;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+}
+
+// Turn-by-turn directions link from the visitor to the firm.
+export function googleMapsDirectionsUrl(firm: FirmLocation): string {
+  if (firm.lat != null && firm.lng != null) {
+    return `https://www.google.com/maps/dir/?api=1&destination=${firm.lat},${firm.lng}`;
+  }
+  const address = [firm.office_address, firm.area].filter(Boolean).join(", ") || firm.name;
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+}
+
+// Accepts "lat, lng" text or a pasted Google Maps URL
+// ( .../@-6.2441,106.8019,17z ... or ...?query=-6.2441,106.8019 ).
+export function parseMapsCoordinates(input: string): { lat: number; lng: number } | null {
+  const s = input.trim();
+  if (!s) return null;
+  const patterns = [
+    s.match(/^(-?\d{1,2}(?:\.\d+)?)[,\s]+(-?\d{1,3}(?:\.\d+)?)$/),
+    s.match(/@(-?\d{1,2}(?:\.\d+)?),(-?\d{1,3}(?:\.\d+)?)/),
+    s.match(/[?&]query=(-?\d{1,2}(?:\.\d+)?),(-?\d{1,3}(?:\.\d+)?)/),
+    s.match(/[?&]ll=(-?\d{1,2}(?:\.\d+)?),(-?\d{1,3}(?:\.\d+)?)/),
+  ];
+  for (const m of patterns) {
+    if (m) {
+      const lat = Number(m[1]);
+      const lng = Number(m[2]);
+      if (Math.abs(lat) <= 90 && Math.abs(lng) <= 180) return { lat, lng };
+    }
+  }
+  return null;
 }

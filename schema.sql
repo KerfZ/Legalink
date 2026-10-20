@@ -8,6 +8,8 @@
 create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text,
+  full_name text not null default '',
+  phone text not null default '',
   role text not null default 'client' check (role in ('client','firm','admin')),
   created_at timestamptz default now()
 );
@@ -31,6 +33,11 @@ create table public.firms (
   logo_url text,
   google_rating numeric(2,1) check (google_rating is null or (google_rating >= 0 and google_rating <= 5)),
   is_featured boolean not null default false,
+  operating_hours text not null default '',
+  lat double precision,
+  lng double precision,
+  is_verified boolean not null default false,
+  credentials_url text,
   contact_name text default '',
   contact_email text default '',
   contact_phone text default '',
@@ -136,6 +143,7 @@ create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public as $$
 declare
   intended_role text;
+  meta_name text;
 begin
   -- Role comes from sign-up metadata (account_role set by the sign-up form).
   -- Only 'client' and 'firm' can ever be self-selected — 'admin' can only be
@@ -144,8 +152,15 @@ begin
   if intended_role not in ('client', 'firm') then
     intended_role := 'client';
   end if;
-  insert into public.profiles (id, display_name, role)
-  values (new.id, split_part(new.email, '@', 1), intended_role)
+  meta_name := coalesce(new.raw_user_meta_data ->> 'full_name', '');
+  insert into public.profiles (id, display_name, full_name, phone, role)
+  values (
+    new.id,
+    case when meta_name <> '' then meta_name else split_part(new.email, '@', 1) end,
+    meta_name,
+    coalesce(new.raw_user_meta_data ->> 'phone', ''),
+    intended_role
+  )
   on conflict (id) do nothing;
   return new;
 end;
@@ -299,6 +314,10 @@ create policy "verified clients review"
 create policy "anyone reads reviews"
   on public.reviews for select to authenticated
   using (true);
+create policy "reviewers update own reviews"
+  on public.reviews for update to authenticated
+  using (client_id = auth.uid())
+  with check (client_id = auth.uid());
 
 -- 11) Storage bucket for the document vault (PDFs/images enforced in app code).
 insert into storage.buckets (id, name, public)
@@ -310,6 +329,23 @@ create policy "vault read" on storage.objects for select to authenticated
   using (bucket_id = 'case-documents');
 create policy "vault delete" on storage.objects for delete to authenticated
   using (bucket_id = 'case-documents');
+
+-- 11b) Storage bucket for firm logos + credential documents (public read;
+--      writes restricted to the uploader's own folder: {user_id}/...).
+insert into storage.buckets (id, name, public)
+values ('firm-logos', 'firm-logos', true)
+on conflict (id) do nothing;
+create policy "firm logos public read" on storage.objects
+  for select using (bucket_id = 'firm-logos');
+create policy "firm logos own folder upload" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'firm-logos' and (storage.foldername(name))[1] = auth.uid()::text);
+create policy "firm logos own folder update" on storage.objects
+  for update to authenticated
+  using (bucket_id = 'firm-logos' and (storage.foldername(name))[1] = auth.uid()::text);
+create policy "firm logos own folder delete" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'firm-logos' and (storage.foldername(name))[1] = auth.uid()::text);
 
 -- 12) grants (needed for RLS + PostgREST).
 grant select on public.firm_ratings to authenticated;
@@ -343,7 +379,37 @@ create trigger prevent_role_escalation
   before update of role on public.profiles
   for each row execute function public.prevent_role_escalation();
 
--- 14) AFTER running: make yourself admin (replace with your login user id):
+-- 14) Prevent self-verification: only admins can change firms.is_verified.
+--     (Otherwise the "owners update own firms" policy would let a firm grant
+--     itself the Verified badge.)
+create or replace function public.prevent_self_verification()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  caller_role text;
+begin
+  if auth.uid() is null then
+    return new; -- service role / SQL editor / server webhooks
+  end if;
+  select role into caller_role from public.profiles where id = auth.uid();
+  if caller_role = 'admin' then
+    return new;
+  end if;
+  if tg_op = 'INSERT' then
+    new.is_verified := false; -- firms can never self-verify on insert
+    return new;
+  end if;
+  if old.is_verified is distinct from new.is_verified then
+    raise exception 'Only admins can change verification status.';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists prevent_self_verification on public.firms;
+create trigger prevent_self_verification
+  before insert or update on public.firms
+  for each row execute function public.prevent_self_verification();
+
+-- 15) AFTER running: make yourself admin (replace with your login user id):
 --   1. Sign up once in the app, then in Supabase > Authentication > Users copy your UUID
 --   2. Run: update public.profiles set role = 'admin' where id = 'PASTE-UUID-HERE';
 -- To onboard as a law firm instead: sign up with "Law firm" selected on /auth/sign-up,

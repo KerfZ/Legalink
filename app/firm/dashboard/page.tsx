@@ -136,6 +136,7 @@ export default function FirmDashboardPage() {
             <h2>Incoming requests.</h2>
           </div>
           <p>Review each case intake, then send a counter-offer with time, fee, and meeting details.</p>
+          <Link href="/firm/profile" className="legal-outlinebtn">Edit profile</Link>
         </div>
 
         {loading && <div className="legal-empty">Loading…</div>}
@@ -152,6 +153,12 @@ export default function FirmDashboardPage() {
         {firm && !firm.is_published && (
           <div className="legal-notice">
             ⏳ Your listing is awaiting admin approval. You can still receive requests once published.
+          </div>
+        )}
+
+        {firm && !firm.is_verified && (
+          <div className="legal-notice">
+            Verification pending: upload your license/credentials from Edit profile so an admin can grant your Verified badge.
           </div>
         )}
 

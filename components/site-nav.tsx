@@ -44,6 +44,7 @@ export function SiteNav() {
         ) : (
           <>
             <Link href="/auth/login">Log in</Link>
+            <Link href="/firm/register">For law firms</Link>
             <Link href="/start-case" className="legal-btn">
               Describe your case
             </Link>

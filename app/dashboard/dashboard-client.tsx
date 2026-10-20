@@ -13,7 +13,7 @@ import {
   formatRange,
 } from "@/lib/legalink";
 
-type Tab = "firms" | "bookings" | "transactions";
+type Tab = "firms" | "bookings" | "transactions" | "verification";
 
 export default function DashboardClient() {
   const [tab, setTab] = useState<Tab>("firms");
@@ -95,6 +95,20 @@ export default function DashboardClient() {
     else refresh();
   }
 
+  // Credential verification: only admins may set is_verified (enforced by the
+  // prevent_self_verification DB trigger as well). Approving also publishes.
+  async function setVerified(id: number, value: boolean) {
+    if (value && !confirm("Verify this firm's credentials and publish its listing?")) return;
+    if (!value && !confirm("Revoke this firm's verification?")) return;
+    const supabase = createClient();
+    const { error: err } = await supabase
+      .from("firms")
+      .update(value ? { is_verified: true, is_published: true } : { is_verified: false })
+      .eq("id", id);
+    if (err) setError(err.message);
+    else refresh();
+  }
+
   const totalFees = txns
     .filter((t) => t.payment_status === "SUCCESS")
     .reduce((sum, t) => sum + t.platform_fee_amount, 0);
@@ -114,7 +128,7 @@ export default function DashboardClient() {
 
         {/* Tabs */}
         <div style={{ display: "flex", gap: 8, margin: "18px 0 14px", flexWrap: "wrap" }}>
-          {(["firms", "bookings", "transactions"] as Tab[]).map((t) => (
+          {(["firms", "bookings", "transactions", "verification"] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -185,6 +199,7 @@ export default function DashboardClient() {
                         <span>{f.area || "no area"}</span>
                         {f.is_featured && <span style={{ background: "var(--gold)", color: "var(--on-gold)" }}>Featured</span>}
                         {!f.is_published && <span>unpublished</span>}
+                        {f.is_verified && <span style={{ background: "#1a7f37", color: "#fff" }}>verified</span>}
                       </div>
                     </div>
                     <div className="legal-firm-right">
@@ -205,6 +220,52 @@ export default function DashboardClient() {
                   <div className="legal-empty">No firms yet. Add your first one.</div>
                 )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {tab === "verification" && (
+          <div>
+            <div className="legal-results-top">
+              <strong>{loading ? "Loading..." : `${firms.filter((f) => !f.is_verified).length} awaiting verification`}</strong>
+              <span>Approving grants the Verified badge and publishes the listing</span>
+            </div>
+            <div className="legal-panel" style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead>
+                  <tr style={{ textAlign: "left", borderBottom: "1px solid var(--line)", color: "var(--muted-legal)", fontSize: 11, letterSpacing: 1 }}>
+                    <th style={{ padding: "8px 6px" }}>FIRM</th>
+                    <th style={{ padding: "8px 6px" }}>CREDENTIALS</th>
+                    <th style={{ padding: "8px 6px" }}>LISTING</th>
+                    <th style={{ padding: "8px 6px" }}>STATUS</th>
+                    <th style={{ padding: "8px 6px" }}>ACTION</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {firms.map((f) => (
+                    <tr key={f.id} style={{ borderBottom: "1px solid var(--line)" }}>
+                      <td style={{ padding: "8px 6px" }}>{f.name}</td>
+                      <td style={{ padding: "8px 6px" }}>
+                        {f.credentials_url ? (
+                          <a href={f.credentials_url} target="_blank" rel="noopener noreferrer">View document</a>
+                        ) : (
+                          "none submitted"
+                        )}
+                      </td>
+                      <td style={{ padding: "8px 6px" }}>{f.is_published ? "Live" : "Unpublished"}</td>
+                      <td style={{ padding: "8px 6px", color: f.is_verified ? "#1a7f37" : "var(--muted-legal)" }}>
+                        {f.is_verified ? "Verified" : "Pending"}
+                      </td>
+                      <td style={{ padding: "8px 6px" }}>
+                        <button className="legal-outlinebtn" onClick={() => setVerified(f.id, !f.is_verified)}>
+                          {f.is_verified ? "Revoke verification" : "Approve & verify"}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {!loading && firms.length === 0 && <div className="legal-empty">No firms yet.</div>}
             </div>
           </div>
         )}
