@@ -37,10 +37,10 @@ export default async function Home() {
           <div className="legal-hero-card">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span className="legal-pill">A SMARTER WAY TO CONNECT</span>
-              <span style={{ fontSize: 26, color: "var(--gold-bright)" }}>✳</span>
+              <span style={{ fontSize: 26, color: "var(--pill-fg)" }}>✳</span>
             </div>
             <h2 style={{ fontSize: 28, lineHeight: 1.1, margin: "38px 0 8px" }}>Less uncertainty.<br />More clarity.</h2>
-            <div style={{ fontSize: 13, color: "#b8a98a" }}>A preview of how Legal!nk makes options easier to compare.</div>
+            <div style={{ fontSize: 13, color: "var(--on-gold-muted)" }}>A preview of how Legal!nk makes options easier to compare.</div>
             <div className="legal-match">
               <div className="legal-match-head">
                 <div className="legal-firmmark">N&C</div>
