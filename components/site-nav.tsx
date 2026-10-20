@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { LogoutButton } from "./logout-button";
+import { ThemeSwitcher } from "./theme-switcher";
 
 export function SiteNav() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -36,6 +37,7 @@ export function SiteNav() {
             </Link>
           </>
         )}
+        <ThemeSwitcher />
       </div>
     </nav>
   );
