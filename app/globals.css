@@ -33,9 +33,9 @@
     --gold: #b8860b;           /* Dark gold - primary brand color */
     --gold-light: #e6c227;     /* Medium gold for accents/hover */
     --gold-bright: #ffd700;    /* Bright gold for highlights */
-    --gold-bg: #fffaf0;        /* Warm cream background */
-    --paper: #fefcf5;          /* Soft cream paper */
-    --muted-legal: #8b8578;    /* Warm gray for muted text */
+    --gold-bg: #f5f2ec;        /* Warm off-white background (slightly darker) */
+    --paper: #fdfaf5;          /* Softer cream for subtle surfaces */
+    --muted-legal: #7a7265;    /* Warm medium gray for muted text */
     --line: #e8e0d0;           /* Soft gold-beige border */
   }
   .dark {
@@ -78,7 +78,7 @@
 }
 
 .legal-wrap { max-width: 1180px; margin: auto; padding: 0 28px; }
-.legal-nav { height: 78px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); background: rgba(253,252,245,.94); position: sticky; top: 0; z-index: 5; padding: 0 max(28px, calc((100vw - 1180px)/2)); }
+.legal-nav { height: 78px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); background: rgba(245,242,236,.96); position: sticky; top: 0; z-index: 5; padding: 0 max(28px, calc((100vw - 1180px)/2)); }
 .legal-logo { font-size: 25px; font-weight: 900; letter-spacing: -1.5px; color: var(--gold); text-decoration: none; }
 .legal-logo span { color: #e6c227; }
 .legal-navlinks { display: flex; gap: 22px; align-items: center; font-size: 13px; font-weight: 650; }
@@ -95,7 +95,7 @@
 .legal-secondary { border: 1px solid var(--line); border-radius: 999px; padding: 12px 18px; background: transparent; font-weight: 750; color: var(--ink); text-decoration: none; display: inline-block; }
 .legal-trust { display: flex; gap: 16px; align-items: center; color: var(--muted-legal); font-size: 12px; margin-top: 25px; }
 .legal-avatars { display: flex; }
-.legal-avatar { width: 27px; height: 27px; border-radius: 50%; border: 2px solid var(--paper); margin-left: -7px; display: grid; place-items: center; font-size: 10px; background: #f0e6d2; }
+.legal-avatar { width: 27px; height: 27px; border-radius: 50%; border: 2px solid var(--line); margin-left: -7px; display: grid; place-items: center; font-size: 10px; background: #f0e6d2; }
 .legal-avatar:first-child { margin-left: 0; }
 .legal-hero-card { background: var(--gold); color: white; border-radius: 25px; padding: 26px; min-height: 360px; position: relative; overflow: hidden; }
 .legal-pill { border-radius: 999px; padding: 7px 10px; font-size: 10px; font-weight: 800; letter-spacing: .5px; background: #ffffff18; color: #e6e6d0; }
@@ -105,7 +105,7 @@
 .legal-match .price { margin-left: auto; text-align: right; font-weight: 850; color: var(--gold); }
 .legal-match .price small { font-weight: 500; }
 .legal-match-foot { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 14px; }
-.legal-tag { font-size: 10px; padding: 6px 9px; border-radius: 999px; background: #fff4e5; color: #8b8578; font-weight: 750; }
+.legal-tag { font-size: 10px; padding: 6px 9px; border-radius: 999px; background: #fff4e5; color: var(--muted-legal); font-weight: 750; }
 .legal-hero-card { background: var(--gold); color: white; border-radius: 25px; padding: 26px; min-height: 360px; position: relative; overflow: hidden; }
 .legal-section { padding: 44px 0 70px; }
 .legal-section-head { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 22px; }
@@ -127,7 +127,7 @@
 .legal-firm h3 { margin: 0; font-size: 17px; }
 .legal-firm .desc { margin: 6px 0 10px; font-size: 13px; color: var(--muted-legal); line-height: 1.55; }
 .legal-chips { display: flex; gap: 7px; flex-wrap: wrap; }
-.legal-chips span { font-size: 11px; padding: 5px 9px; border-radius: 999px; background: #fff4e5; color: #8b8578; font-weight: 700; }
+.legal-chips span { font-size: 11px; padding: 5px 9px; border-radius: 999px; background: #fff4e5; color: var(--muted-legal); font-weight: 700; }
 .legal-firm-right { text-align: right; }
 .legal-firm-right strong { color: var(--gold); }
 .legal-firm-right small { display: block; color: var(--muted-legal); font-size: 11px; margin: 2px 0 10px; }
