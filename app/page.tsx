@@ -70,15 +70,7 @@ export default async function Home() {
               Featured &amp; verified firms, live from the marketplace.
             </div>
 
-            {!user ? (
-              <div className="legal-match" style={{ display: "block" }}>
-                <strong style={{ fontSize: 15 }}>See real firms with transparent prices.</strong>
-                <p style={{ fontSize: 13, color: "var(--on-gold-muted)", margin: "8px 0 14px", lineHeight: 1.5 }}>
-                  Log in to browse recommended law firms — profiles, price ranges, ratings, and verified credentials.
-                </p>
-                <Link href="/auth/login?next=/" className="legal-secondary">Log in to see firms</Link>
-              </div>
-            ) : !previewFirms || previewFirms.length === 0 ? (
+            {!previewFirms || previewFirms.length === 0 ? (
               <div className="legal-match" style={{ display: "block" }}>
                 <span style={{ fontSize: 13, color: "var(--on-gold-muted)" }}>
                   No firms published yet — new firms are added regularly.
